@@ -77,11 +77,14 @@ valid_data=final_data[146:,:]
 
 scaler=MinMaxScaler(feature_range=(0,1))
 
+print(len(train_data))
+
 scaled_data = scaler.fit_transform(final_data)
 x_train, y_train = [],[]
 for i in range(60, len(train_data)):
     x_train.append(scaled_data[i-60:i,0])
     y_train.append(scaled_data[i,0])
+
 
 #LSTM
 
@@ -98,11 +101,11 @@ model_data = scaler.transform(model_data)
 #Train and Test Data
 
 lstm_model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
-lstm_model.fit(np.array(x_train), np.array(y_train), epochs=1, batch_size=1, verbose = 2)
+lstm_model.fit(np.array(x_train), np.array(y_train), epochs=10, batch_size=1, verbose = 2)
 
 print(model_data.shape[0])
 x_test = []
-for i in range(60, model_data.shape[0]):    
+for i in range(90, model_data.shape[0]+1):    
     x_test.append(model_data[i-60:i,0])
 
 
@@ -111,14 +114,18 @@ x_test = np.array(x_test)
 
 x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1],1))
 
-predicted_stock_price = lstm_model.predict(x_test)
+
+predicted_stock_price = lstm_model.predict(x_test[0])
 predicted_stock_price = scaler.inverse_transform(predicted_stock_price)
 
 
-#Prediction Results
+# #Prediction Results
 
-train_data = data[:200]
-valid_data = data[200:]
+train_data = data[:65]
+valid_data = data[65:]
+
+print(predicted_stock_price)
+
 valid_data['Predictions'] = predicted_stock_price
 plt.plot(train_data["Close"])
 plt.plot(valid_data[['Close', 'Predictions']])
